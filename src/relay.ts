@@ -10,7 +10,7 @@ import {
   TaskQueryParams,
   Task,
   TaskIdParams,
-  Skill,
+  AgentSkill,
 } from "@artinet/sdk";
 import {
   AgentType,
@@ -205,7 +205,7 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
         agentCard.name.toLowerCase().includes(query.toLowerCase()) ||
         agentCard.description.toLowerCase().includes(query.toLowerCase()) ||
         agentCard.skills.some(
-          (skill: Skill) =>
+          (skill: AgentSkill) =>
             skill.name.toLowerCase().includes(query.toLowerCase()) ||
             skill.description.toLowerCase().includes(query.toLowerCase())
         )

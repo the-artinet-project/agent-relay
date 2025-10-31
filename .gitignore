@@ -5,7 +5,6 @@
 .idea
 .vscode
 .history
-**/.smithery
 **/test/config
 **/test/metadata.json
 **/test/runtime.test.ts

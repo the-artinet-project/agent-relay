@@ -1,10 +1,10 @@
-import { scanAgents } from "../src/scan.js";
-import { AgentRelay } from "../src/relay.js";
+import { scanAgents, AgentRelay } from "../src/index.js";
 import {
   createAgentServer,
   AgentBuilder,
   ExpressAgentServer,
   getContent,
+  AgentCard,
 } from "@artinet/sdk";
 import {
   jest,
@@ -16,8 +16,30 @@ import {
 } from "@jest/globals";
 import { Server } from "http";
 import { join } from "path";
+
 jest.setTimeout(10000);
 const TEST_CONFIG_PATH = join(process.cwd(), "test", "config");
+const testAgentCard: AgentCard = {
+  name: "test-agent",
+  url: "http://localhost:3000/a2a",
+  description: "A test agent",
+  version: "1.0.0",
+  protocolVersion: "0.3.0",
+  capabilities: {
+    streaming: true,
+    pushNotifications: true,
+    stateTransitionHistory: true,
+  },
+  defaultInputModes: ["text"],
+  defaultOutputModes: ["text"],
+  skills: [
+    {
+      id: "test-skill",
+      name: "test-skill",
+      description: "A test skill",
+    },
+  ],
+};
 describe("AgentRelay", () => {
   let agentServer: ExpressAgentServer;
   let server: Server;
@@ -27,27 +49,7 @@ describe("AgentRelay", () => {
         agent: AgentBuilder()
           .text(() => "hello world!")
           .createAgent({
-            agentCard: {
-              name: "test-agent",
-              url: "http://localhost:3000/a2a",
-              version: "1.0.0",
-              protocolVersion: "0.3.0",
-              defaultInputModes: ["text"],
-              defaultOutputModes: ["text"],
-              capabilities: {
-                streaming: true,
-                pushNotifications: true,
-                stateTransitionHistory: true,
-              },
-              description: "A test agent",
-              skills: [
-                {
-                  id: "test-skill",
-                  name: "test-skill",
-                  description: "A test skill",
-                },
-              ],
-            },
+            agentCard: testAgentCard,
           }),
       });
       server = agentServer.app.listen(3001, () => {});
@@ -156,27 +158,7 @@ describe("AgentRelay", () => {
             return "hello world!";
           })
           .createAgent({
-            agentCard: {
-              name: "test-agent-2",
-              url: "http://localhost:3000/a2a",
-              version: "1.0.0",
-              protocolVersion: "0.3.0",
-              defaultInputModes: ["text"],
-              defaultOutputModes: ["text"],
-              capabilities: {
-                streaming: true,
-                pushNotifications: true,
-                stateTransitionHistory: true,
-              },
-              description: "A test agent",
-              skills: [
-                {
-                  id: "test-skill",
-                  name: "test-skill",
-                  description: "A test skill",
-                },
-              ],
-            },
+            agentCard: { ...testAgentCard, name: "test-agent-2" },
           });
         const agentCard = await relay.registerAgent(testAgent);
         expect(agentCard).toBeDefined();
@@ -198,27 +180,7 @@ describe("AgentRelay", () => {
             return "hello world!";
           })
           .createAgent({
-            agentCard: {
-              name: "test-agent",
-              url: "http://localhost:3000/a2a",
-              version: "1.0.0",
-              protocolVersion: "0.3.0",
-              defaultInputModes: ["text"],
-              defaultOutputModes: ["text"],
-              capabilities: {
-                streaming: true,
-                pushNotifications: true,
-                stateTransitionHistory: true,
-              },
-              description: "A test agent",
-              skills: [
-                {
-                  id: "test-skill",
-                  name: "test-skill",
-                  description: "A test skill",
-                },
-              ],
-            },
+            agentCard: testAgentCard,
           });
         const agentCard = await relay.registerAgent(testAgent);
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -260,27 +222,7 @@ describe("AgentRelay", () => {
             return "hello world!";
           })
           .createAgent({
-            agentCard: {
-              name: "test-agent",
-              url: "http://localhost:3000/a2a",
-              version: "1.0.0",
-              protocolVersion: "0.3.0",
-              defaultInputModes: ["text"],
-              defaultOutputModes: ["text"],
-              capabilities: {
-                streaming: true,
-                pushNotifications: true,
-                stateTransitionHistory: true,
-              },
-              description: "A test agent",
-              skills: [
-                {
-                  id: "test-skill",
-                  name: "test-skill",
-                  description: "A test skill",
-                },
-              ],
-            },
+            agentCard: testAgentCard,
           });
         const agentCard = await relay.registerAgent(testAgent);
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -315,33 +257,41 @@ describe("AgentRelay", () => {
           agent: AgentBuilder()
             .text(() => "hello world!")
             .createAgent({
-              agentCard: {
-                name: "test-agent-2",
-                url: "http://localhost:3000/a2a",
-                version: "1.0.0",
-                protocolVersion: "0.3.0",
-                defaultInputModes: ["text"],
-                defaultOutputModes: ["text"],
-                capabilities: {
-                  streaming: true,
-                  pushNotifications: true,
-                  stateTransitionHistory: true,
-                },
-                description: "A test agent",
-                skills: [
-                  {
-                    id: "test-skill",
-                    name: "test-skill",
-                    description: "A test skill",
-                  },
-                ],
-              },
+              agentCard: { ...testAgentCard, name: "test-agent-2" },
             }),
         });
         const server2 = agentServer2.app.listen(4005, () => {});
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         expect(relay.getAgentCount()).toBe(2);
         await server2.close();
+      }, 100000);
+      it("should detect multiple agents", async () => {
+        expect(relay.getAgentCount()).toBe(1);
+        const httpServers: Server[] = [];
+        const agentServers: ExpressAgentServer[] = [];
+        for (let i = 0; i < 10; i++) {
+          agentServers.push(
+            createAgentServer({
+              agent: AgentBuilder()
+                .text(() => "hello world!")
+                .createAgent({
+                  agentCard: { ...testAgentCard, name: `test-agent-${i}` },
+                }),
+            })
+          );
+          httpServers.push(agentServers[i].app.listen(3002 + i, () => {}));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        expect(relay.getAgentCount()).toBe(11);
+        const agentIds = await relay.getAgentIds();
+        expect(agentIds.length).toBe(11);
+        for (let i = 0; i < 10; i++) {
+          expect(agentIds).toContain(`test-agent-${i}`);
+        }
+        await Promise.all(httpServers.map((httpServer) => httpServer.close()));
+        await Promise.all(
+          agentServers.map((agentServer) => agentServer.agent.stop())
+        );
       }, 100000);
     });
   });
@@ -367,6 +317,6 @@ describe("AgentRelay", () => {
     });
     expect(relay.getAgentCount()).toBe(0);
     await relay.close();
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 });

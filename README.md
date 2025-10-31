@@ -1,14 +1,14 @@
 [![Website](https://img.shields.io/badge/website-artinet.io-black)](https://artinet.io/)
-[![npm version](https://img.shields.io/npm/v/@artinet/agent-relay-mcp.svg)](https://www.npmjs.com/package/@artinet/agent-relay-mcp)
-[![npm downloads](https://img.shields.io/npm/dt/@artinet/agent-relay-mcp.svg)](https://www.npmjs.com/package/@artinet/agent-relay-mcp)
+[![npm version](https://img.shields.io/npm/v/@artinet/agent-relay.svg)](https://www.npmjs.com/package/@artinet/agent-relay)
+[![npm downloads](https://img.shields.io/npm/dt/@artinet/agent-relay.svg)](https://www.npmjs.com/package/@artinet/agent-relay)
 [![Apache License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Known Vulnerabilities](https://snyk.io/test/npm/@artinet/agent-relay-mcp/badge.svg)](https://snyk.io/test/npm/@artinet/agent-relay-mcp)
-[![GitHub stars](https://img.shields.io/github/stars/the-artinet-project/mcp?style=social)](https://github.com/the-artinet-project/mcp/stargazers)
+[![Known Vulnerabilities](https://snyk.io/test/npm/@artinet/agent-relay/badge.svg)](https://snyk.io/test/npm/@artinet/agent-relay)
+[![GitHub stars](https://img.shields.io/github/stars/the-artinet-project/agent-relay?style=social)](https://github.com/the-artinet-project/agent-relay)
 [![Discord](https://dcbadge.limes.pink/api/server/DaxzSchmmX?style=flat)](https://discord.gg/DaxzSchmmX)
 
-# Agent Relay MCP Server
+# Agent Relay Server
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that enables AI agents to discover and communicate with other [A2A (Agent-to-Agent)](https://github.com/a2aproject/A2A) enabled AI agents through the [@artinet/sdk](https://github.com/the-artinet-project/artinet-sdk).
+A library that enables AI agents to discover and communicate with other [A2A (Agent-to-Agent)](https://github.com/a2aproject/A2A) enabled AI agents via the [@artinet/sdk](https://github.com/the-artinet-project/artinet-sdk).
 
 ## Features
 
@@ -21,107 +21,12 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that en
 ## Installation
 
 ```bash
-npm install @artinet/agent-relay-mcp
+npm install @artinet/agent-relay
 ```
 
 ## Usage
 
-### Commandline
-
-```bash
-npx @artinet/agent-relay-mcp [callerId] [startPort] [endPort] [scanning-threads]
-```
-
-Example:
-
-```bash
-npx @artinet/agent-relay-mcp my-assistant 3000 3100 10
-```
-
 \*we recommend allocating a small port range because port scanning is resource intensive.
-
-### As an MCP Server
-
-```typescript
-import { RelayServer } from "@artinet/agent-relay-mcp";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-
-const server = new RelayServer({
-  name: "agent-relay-server",
-  version: "0.0.1",
-});
-
-await server.init({
-  callerId: "my-assistant-name",
-  scanConfig: {
-    host: "localhost",
-    startPort: 3000,
-    endPort: 3100,
-    threads: 10,
-  },
-});
-
-const transport = new StdioServerTransport();
-await server.connect(transport);
-```
-
-## Tool Reference
-
-The server exposes six tools for agent interaction:
-
-### `sendMessage`
-
-Send a message to an agent and receive a response.
-
-| Parameter | Type   | Description                                 |
-| --------- | ------ | ------------------------------------------- |
-| `agentId` | string | The ID of the agent to send the message to  |
-| `message` | string | The message content to send                 |
-| `taskId`  | string | (Optional) Task ID to continue conversation |
-
-### `getTask`
-
-Get the current status of a running task.
-
-| Parameter | Type   | Description                 |
-| --------- | ------ | --------------------------- |
-| `agentId` | string | The ID of the agent         |
-| `taskId`  | string | The ID of the task to query |
-
-### `cancelTask`
-
-Cancel a running task.
-
-| Parameter | Type   | Description                  |
-| --------- | ------ | ---------------------------- |
-| `agentId` | string | The ID of the agent          |
-| `taskId`  | string | The ID of the task to cancel |
-
-### `getAgentCard`
-
-Get detailed information about an agent, including its capabilities and skills.
-
-| Parameter | Type   | Description         |
-| --------- | ------ | ------------------- |
-| `agentId` | string | The ID of the agent |
-
-### `viewAgents`
-
-List all registered agents available to the relay.
-
-### `searchAgents`
-
-Search for agents by name, description, or skills.
-
-| Parameter | Type   | Description                     |
-| --------- | ------ | ------------------------------- |
-| `query`   | string | Search query (case-insensitive) |
-
-## Configuration
-
-### Environment Variables
-
-- `ARTINET_RELAY_SYNC_INTERVAL`: Agent discovery sync interval in milliseconds (default: 2500)
 
 ### Configuration Options
 
@@ -139,17 +44,62 @@ interface AgentRelayConfig {
 }
 ```
 
-## How It Works
+### Quickstart
 
-1. **Discovery**: The relay scans a port range (default: 3000-3100) to find agents that expose A2A endpoints
-2. **Registration**: Discovered agents are registered and their capabilities are cached
-3. **Synchronization**: Periodic sync keeps the agent registry up-to-date
-4. **Relay**: Messages are forwarded to appropriate agents based on agent IDs
-5. **Task Management**: Task status and cancellation are handled through the relay interface
+```typescript
+import { AgentBuilder, createAgentServer, SendMessageSuccessResult } from "@artinet/sdk";
+import { AgentRelay } from "@artinet/agent-relay";
 
-### Smithery
+// create and start an Agent Server
+const agentServer = createAgentServer({
+    agent: AgentBuilder()
+      .text(() => "hello world!")
+      .createAgent({
+        agentCard: {
+          name: "test-agent",
+          skills: [{
+              name: "calculator",
+              ...
+            }],
+          ...
+        },
+      }),
+  });
+const server = agentServer.app.listen(3001, () => {
+  console.log("test-agent started on port 3001");
+});
 
-\*Local support for smithery is still experimental.
+// Create a relay instance
+const relay: AgentRelay = await AgentRelay.create({
+  callerId: "caller-id", // The callers unique ID
+  scanConfig: {
+    host: "localhost",
+    startPort: 3000,
+    endPort: 3100,
+  },
+  syncInterval: 2500, // Rescan every 2.5 seconds
+});
+
+// Discover available agents
+const agentIds: string[] = await relay.getAgentIds();
+console.log("Available agents:", agentIds);
+
+// Search for agents by name, description, or skills
+const agents: AgentCard[] = await relay.searchAgents("calculator");
+
+// Send a message to an agent
+const response: SendMessageSuccessResult = await relay.sendMessage("test-agent", {
+  message: {
+    role: "user",
+    kind: "message",
+    parts: [{ kind: "text", text: "Hello!" }],
+    messageId: "msg-123",
+  },
+});
+
+// Clean up when done
+await relay.close();
+```
 
 ### Build
 
@@ -162,6 +112,11 @@ npm run build
 ```bash
 npm test
 ```
+
+## Requirements
+
+- [Node.js](https://nodejs.org/en/download) ≥ 18.9.1
+  - Recommended: 20 || ≥ 22
 
 ## License
 

@@ -10,6 +10,7 @@ import {
   TaskQueryParams,
   Task,
   TaskIdParams,
+  Skill,
 } from "@artinet/sdk";
 import {
   AgentType,
@@ -93,10 +94,21 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
       console.error(`Error scanning agents: ${error}`);
       return [];
     });
+    let liveAgents: string[] = [];
     for (const config of configs) {
-      await this.registerAgent(config).catch((error) => {
+      const agentCard = await this.registerAgent(config).catch((error) => {
         console.warn(`Error registering agent: ${error}`);
       });
+      if (agentCard) {
+        liveAgents.push(agentCard.name);
+      }
+    }
+    const currentAgents = this.getAgentIds();
+    const agentsToRemove = currentAgents.filter(
+      (agentId: string) => !liveAgents.includes(agentId)
+    );
+    for (const agentId of agentsToRemove) {
+      this.deregisterAgent(agentId);
     }
   }
 
@@ -189,11 +201,11 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
         )
       )
     ).filter(
-      (agentCard) =>
+      (agentCard: AgentCard) =>
         agentCard.name.toLowerCase().includes(query.toLowerCase()) ||
         agentCard.description.toLowerCase().includes(query.toLowerCase()) ||
         agentCard.skills.some(
-          (skill) =>
+          (skill: Skill) =>
             skill.name.toLowerCase().includes(query.toLowerCase()) ||
             skill.description.toLowerCase().includes(query.toLowerCase())
         )

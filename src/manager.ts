@@ -44,7 +44,7 @@ export class AgentManager implements IAgentManager {
       agents.map(async (agent) => await getAgentCard(agent))
     );
     return agentCards.filter(
-      (agentCard) => agentCard !== undefined
+      (agentCard: AgentCard | undefined) => agentCard !== undefined
     ) as AgentCard[];
   }
   getAgentCount(): number {

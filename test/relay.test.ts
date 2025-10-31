@@ -293,6 +293,33 @@ describe("AgentRelay", () => {
           agentServers.map((agentServer) => agentServer.agent.stop())
         );
       }, 100000);
+      it("should remove dead agents", async () => {
+        expect(relay.getAgentCount()).toBe(1);
+        const httpServers: Server[] = [];
+        const agentServers: ExpressAgentServer[] = [];
+        for (let i = 0; i < 2; i++) {
+          agentServers.push(
+            createAgentServer({
+              agent: AgentBuilder()
+                .text(() => "hello world!")
+                .createAgent({
+                  agentCard: { ...testAgentCard, name: `test-agent-${i}` },
+                }),
+            })
+          );
+          httpServers.push(agentServers[i].app.listen(3002 + i, () => {}));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        expect(relay.getAgentCount()).toBe(3);
+        await httpServers[0].close();
+        await agentServers[0].agent.stop();
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        expect(relay.getAgentCount()).toBe(2);
+        await httpServers[1].close();
+        await agentServers[1].agent.stop();
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        expect(relay.getAgentCount()).toBe(1);
+      }, 150000);
     });
   });
   it("should pass empty array when no servers found", async () => {

@@ -43,6 +43,30 @@ const testAgentCard: AgentCard = {
 describe("AgentRelay", () => {
   let agentServer: ExpressAgentServer;
   let server: Server;
+  it("should pass empty array when no servers found", async () => {
+    const configs = await scanAgents({
+      host: "localhost",
+      startPort: 3000,
+      endPort: 6000,
+    });
+    expect(configs).toHaveLength(0);
+  });
+  it("relay should be empty when no agents found", async () => {
+    const relay = await AgentRelay.create({
+      callerId: "test-caller",
+      scanConfig: {
+        host: "localhost",
+        startPort: 3000,
+        endPort: 6000,
+      },
+      abortSignal: new AbortController().signal,
+      syncInterval: 2500,
+      configPath: TEST_CONFIG_PATH,
+    });
+    expect(relay.getAgentCount()).toBe(0);
+    await relay.close();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  });
   describe("scanAgents", () => {
     beforeEach(async () => {
       agentServer = createAgentServer({
@@ -321,29 +345,5 @@ describe("AgentRelay", () => {
         expect(relay.getAgentCount()).toBe(1);
       }, 150000);
     });
-  });
-  it("should pass empty array when no servers found", async () => {
-    const configs = await scanAgents({
-      host: "localhost",
-      startPort: 3000,
-      endPort: 6000,
-    });
-    expect(configs).toHaveLength(0);
-  });
-  it("relay should be empty when no agents found", async () => {
-    const relay = await AgentRelay.create({
-      callerId: "test-caller",
-      scanConfig: {
-        host: "localhost",
-        startPort: 3000,
-        endPort: 6000,
-      },
-      abortSignal: new AbortController().signal,
-      syncInterval: 2500,
-      configPath: TEST_CONFIG_PATH,
-    });
-    expect(relay.getAgentCount()).toBe(0);
-    await relay.close();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 });

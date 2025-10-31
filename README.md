@@ -124,6 +124,5 @@ Apache-2.0
 
 ## References
 
-- [MCP Specification](https://modelcontextprotocol.io)
 - [A2A Protocol Documentation](https://artinet.io)
 - [Artinet SDK](https://github.com/the-artinet-project/sdk)

@@ -2,6 +2,7 @@
  * Copyright 2025 The Artinet Project
  * SPDX-License-Identifier: Apache-2.0
  */
+import { ScanConfig } from "./config.js";
 import { AgentType, IAgentManager } from "./manager.js";
 import { ClientConfig } from "./schema.js";
 import {
@@ -14,6 +15,7 @@ import {
 } from "@artinet/sdk";
 
 export interface IAgentRelay extends IAgentManager {
+  discoverAgents(config: ScanConfig): Promise<AgentCard[]>;
   registerAgent(agent: AgentType | ClientConfig): Promise<AgentCard>;
   deregisterAgent(agentId: string): Promise<void>;
   sendMessage(

@@ -6,17 +6,17 @@
 [![GitHub stars](https://img.shields.io/github/stars/the-artinet-project/agent-relay?style=social)](https://github.com/the-artinet-project/agent-relay/stargazers)
 [![Discord](https://dcbadge.limes.pink/api/server/DaxzSchmmX?style=flat)](https://discord.gg/DaxzSchmmX)
 
-# Agent Relay Server
+# Agent Relay
 
 A library that enables AI agents to discover and communicate with other [A2A (Agent-to-Agent)](https://github.com/a2aproject/A2A) enabled AI agents via the [@artinet/sdk](https://github.com/the-artinet-project/artinet-sdk).
 
 ## Features
 
 - **Automatic Agent Discovery**: Scans network ports to discover available agents
+- **Multi-Agent Orchestration**: Coordinate tasks across multiple specialized agents
 - **Message Relay**: Send messages to agents and receive responses with full task context
 - **Task Management**: Query task status and cancel running tasks
 - **Agent Discovery**: View and search agents by name, description, or skills
-- **Multi-Agent Orchestration**: Coordinate workflows across multiple specialized agents
 
 ## Installation
 
@@ -26,7 +26,7 @@ npm install @artinet/agent-relay
 
 ## Usage
 
-\*we recommend allocating a small port range because port scanning is resource intensive.
+\*We recommend allocating a small port range because port scanning is resource intensive.
 
 ### Configuration Options
 
@@ -65,6 +65,7 @@ const agentServer = createAgentServer({
         },
       }),
   });
+
 const server = agentServer.app.listen(3001, () => {
   console.log("test-agent started on port 3001");
 });
@@ -80,13 +81,6 @@ const relay: AgentRelay = await AgentRelay.create({
   syncInterval: 2500, // Rescan every 2.5 seconds
 });
 
-// Discover available agents
-const agentIds: string[] = await relay.getAgentIds();
-console.log("Available agents:", agentIds);
-
-// Search for agents by name, description, or skills
-const agents: AgentCard[] = await relay.searchAgents("calculator");
-
 // Send a message to an agent
 const response: SendMessageSuccessResult = await relay.sendMessage("test-agent", {
   message: {
@@ -99,6 +93,19 @@ const response: SendMessageSuccessResult = await relay.sendMessage("test-agent",
 
 // Clean up when done
 await relay.close();
+```
+
+**List the available agents**
+
+```typescript
+const agentIds: string[] = await relay.getAgentIds();
+console.log("Available agents:", agentIds);
+```
+
+**Search for agents by name, description, or skills**
+
+```typescript
+const agents: AgentCard[] = await relay.searchAgents("calculator");
 ```
 
 ### Build

@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/the-artinet-project/agent-relay"
+    "url": "git+https://github.com/the-artinet-project/agent-relay.git"
   },
   "issues": {
     "url": "https://github.com/the-artinet-project/agent-relay/issues"

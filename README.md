@@ -82,14 +82,14 @@ const relay: AgentRelay = await AgentRelay.create({
 });
 
 // Send a message to an agent
-const response: SendMessageSuccessResult = await relay.sendMessage("test-agent", {
+const response: SendMessageSuccessResult = await relay.sendMessage({ agentId: "test-agent", messageSendParams: {
   message: {
     role: "user",
     kind: "message",
     parts: [{ kind: "text", text: "Hello!" }],
     messageId: "msg-123",
   },
-});
+}});
 
 // Clean up when done
 await relay.close();
@@ -105,7 +105,7 @@ console.log("Available agents:", agentIds);
 **Search for agents by name, description, or skills**
 
 ```typescript
-const agents: AgentCard[] = await relay.searchAgents("calculator");
+const agents: AgentCard[] = await relay.searchAgents({ query: "calculator" });
 ```
 
 ### Build

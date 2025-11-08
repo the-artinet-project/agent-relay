@@ -37,6 +37,7 @@ const testAgentCard: AgentCard = {
       id: "test-skill",
       name: "test-skill",
       description: "A test skill",
+      tags: [],
     },
   ],
 };
@@ -144,27 +145,30 @@ describe("AgentRelay", () => {
         expect(agent).toBeDefined();
       });
       it("should get agentCard", async () => {
-        const agentCard = await relay.getAgentCard("test-agent");
+        const agentCard = await relay.getAgentCard({ agentId: "test-agent" });
         expect(agentCard).toBeDefined();
         expect(agentCard?.name).toBe("test-agent");
       });
       it("should search agents", async () => {
-        const agents = await relay.searchAgents("test-agent");
+        const agents = await relay.searchAgents({ query: "test-agent" });
         expect(agents.length).toBeGreaterThanOrEqual(1);
         expect(agents[0].name).toBe("test-agent");
       });
       it("should send message", async () => {
-        const response = await relay.sendMessage("test-agent", {
-          message: {
-            role: "user",
-            kind: "message",
-            parts: [
-              {
-                text: "hello",
-                kind: "text",
-              },
-            ],
-            messageId: "123",
+        const response = await relay.sendMessage({
+          agentId: "test-agent",
+          messageSendParams: {
+            message: {
+              role: "user",
+              kind: "message",
+              parts: [
+                {
+                  text: "hello",
+                  kind: "text",
+                },
+              ],
+              messageId: "123",
+            },
           },
         });
         expect(response).toBeDefined();
@@ -209,24 +213,30 @@ describe("AgentRelay", () => {
           });
         const agentCard = await relay.registerAgent(testAgent);
         await new Promise((resolve) => setTimeout(resolve, 500));
-        const response = relay.sendMessage(agentCard.name, {
-          message: {
-            role: "user",
-            kind: "message",
-            taskId: "123",
-            parts: [
-              {
-                text: "hello",
-                kind: "text",
-              },
-            ],
-            messageId: "123",
+        const response = relay.sendMessage({
+          agentId: agentCard.name,
+          messageSendParams: {
+            message: {
+              role: "user",
+              kind: "message",
+              taskId: "123",
+              parts: [
+                {
+                  text: "hello",
+                  kind: "text",
+                },
+              ],
+              messageId: "123",
+            },
           },
         });
         expect(response).toBeDefined();
         await new Promise((resolve) => setTimeout(resolve, 500));
-        const task = await relay.getTask(agentCard.name, {
-          id: "123",
+        const task = await relay.getTask({
+          agentId: agentCard.name,
+          taskQuery: {
+            id: "123",
+          },
         });
         expect(task).toBeDefined();
         expect(task?.status?.state).toBe("submitted");
@@ -251,24 +261,30 @@ describe("AgentRelay", () => {
           });
         const agentCard = await relay.registerAgent(testAgent);
         await new Promise((resolve) => setTimeout(resolve, 500));
-        const response = relay.sendMessage(agentCard.name, {
-          message: {
-            role: "user",
-            kind: "message",
-            taskId: "123",
-            parts: [
-              {
-                text: "hello",
-                kind: "text",
-              },
-            ],
-            messageId: "123",
+        const response = relay.sendMessage({
+          agentId: agentCard.name,
+          messageSendParams: {
+            message: {
+              role: "user",
+              kind: "message",
+              taskId: "123",
+              parts: [
+                {
+                  text: "hello",
+                  kind: "text",
+                },
+              ],
+              messageId: "123",
+            },
           },
         });
         expect(response).toBeDefined();
         await new Promise((resolve) => setTimeout(resolve, 500));
-        const task = await relay.cancelTask(agentCard.name, {
-          id: "123",
+        const task = await relay.cancelTask({
+          agentId: agentCard.name,
+          taskId: {
+            id: "123",
+          },
         });
         expect(task?.status?.state).toBe("canceled");
         await testAgent.stop();

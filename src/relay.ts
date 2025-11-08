@@ -5,11 +5,8 @@
 import {
   A2AClient,
   AgentCard,
-  MessageSendParams,
   SendMessageSuccessResult,
-  TaskQueryParams,
   Task,
-  TaskIdParams,
   AgentSkill,
 } from "@artinet/sdk";
 import {
@@ -18,6 +15,11 @@ import {
   ClientConfig,
   AgentRelayConfig,
   ScanConfig,
+  SendRelayMessageRequest,
+  GetRelayTaskRequest,
+  CancelRelayTaskRequest,
+  SearchRelayRequest,
+  AgentRelayRequest,
 } from "./types/index.js";
 import { AgentManager, getAgentCard } from "./manager.js";
 import { scanAgents, DEFAULT_MAX_THREADS } from "./scan.js";
@@ -364,14 +366,14 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * ```
    */
   async sendMessage(
-    agentId: string,
-    messageParams: MessageSendParams
+    params: SendRelayMessageRequest
   ): Promise<SendMessageSuccessResult> {
+    const { agentId, messageSendParams } = params;
     const agent = this.getAgent(agentId);
     if (!agent) {
       throw new Error(`Agent ${agentId} not found`);
     }
-    const sendMessageResult = await agent.sendMessage(messageParams);
+    const sendMessageResult = await agent.sendMessage(messageSendParams);
     if (!sendMessageResult) {
       throw new Error(`Failed to send message to agent ${agentId}`);
     }
@@ -404,7 +406,8 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * console.log(task.result);
    * ```
    */
-  async getTask(agentId: string, taskQuery: TaskQueryParams): Promise<Task> {
+  async getTask(params: GetRelayTaskRequest): Promise<Task> {
+    const { agentId, taskQuery } = params;
     const agent = this.getAgent(agentId);
     if (!agent) {
       throw new Error(`Agent ${agentId} not found`);
@@ -446,7 +449,8 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * The task cancellation behavior depends on the agent's implementation.
    * Some tasks may not be immediately cancelled if they are in a critical state.
    */
-  async cancelTask(agentId: string, taskId: TaskIdParams): Promise<Task> {
+  async cancelTask(params: CancelRelayTaskRequest): Promise<Task> {
+    const { agentId, taskId } = params;
     const agent = this.getAgent(agentId);
     if (!agent) {
       throw new Error(`Agent ${agentId} not found`);
@@ -479,7 +483,8 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * console.log(card.skills);      // Array of available skills
    * ```
    */
-  async getAgentCard(agentId: string): Promise<AgentCard> {
+  async getAgentCard(params: AgentRelayRequest): Promise<AgentCard> {
+    const { agentId } = params;
     const agent = this.getAgent(agentId);
     if (!agent) {
       throw new Error(`Agent ${agentId} not found`);
@@ -523,7 +528,8 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * - An empty query string will return all registered agents
    * - The search uses substring matching (not exact matching)
    */
-  async searchAgents(query: string): Promise<AgentCard[]> {
+  async searchAgents(params: SearchRelayRequest): Promise<AgentCard[]> {
+    const { query } = params;
     const agents = this.getAgents();
     return (
       await Promise.all(

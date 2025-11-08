@@ -75,8 +75,9 @@ describe("AgentRelay", () => {
           .createAgent({
             agentCard: testAgentCard,
           }),
+        basePath: "/a2a",
       });
-      server = agentServer.app.listen(3001, () => {});
+      server = agentServer.app.listen(3000, () => {});
       //wait for server to start
       await new Promise((resolve) => setTimeout(resolve, 1000));
     });
@@ -86,11 +87,11 @@ describe("AgentRelay", () => {
     it("it should detect local agent server", async () => {
       const configs = await scanAgents({
         host: "localhost",
-        startPort: 3001,
+        startPort: 3000,
         endPort: 3001,
       });
       expect(configs).toHaveLength(1);
-      expect(configs[0].url).toBe("http://localhost:3001");
+      expect(configs[0].url).toBe("http://localhost:3000");
       expect(configs[0].headers).toBeUndefined();
       expect(configs[0].fallbackPath).toBeUndefined();
     });
@@ -103,7 +104,7 @@ describe("AgentRelay", () => {
         endPort: 5000,
       });
       expect(configs).toHaveLength(2);
-      expect(configs[0].url).toBe("http://localhost:3001");
+      expect(configs[0].url).toBe("http://localhost:3000");
       expect(configs[1].url).toBe("http://localhost:4002");
       await server2.close();
     });
@@ -299,7 +300,11 @@ describe("AgentRelay", () => {
               agent: AgentBuilder()
                 .text(() => "hello world!")
                 .createAgent({
-                  agentCard: { ...testAgentCard, name: `test-agent-${i}` },
+                  agentCard: {
+                    ...testAgentCard,
+                    name: `test-agent-${i}`,
+                    url: `http://localhost:${3002 + i}`,
+                  },
                 }),
             })
           );
@@ -327,7 +332,11 @@ describe("AgentRelay", () => {
               agent: AgentBuilder()
                 .text(() => "hello world!")
                 .createAgent({
-                  agentCard: { ...testAgentCard, name: `test-agent-${i}` },
+                  agentCard: {
+                    ...testAgentCard,
+                    name: `test-agent-${i}`,
+                    url: `http://localhost:${3002 + i}`,
+                  },
                 }),
             })
           );

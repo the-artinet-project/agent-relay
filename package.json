@@ -45,8 +45,8 @@
     "prepublishOnly": "npm run clean:all && npm i && npm run build && npm test"
   },
   "dependencies": {
-    "@artinet/sdk": "^0.5.17",
-    "@artinet/types": "^0.0.5",
+    "@artinet/sdk": "^0.5.18",
+    "@artinet/types": "^0.0.7",
     "p-limit": "^7.2.0",
     "portscanner": "^2.2.0",
     "uuid": "^11.1.0",

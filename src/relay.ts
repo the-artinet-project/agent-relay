@@ -243,7 +243,8 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
     let detectedAgents: AgentCard[] = [];
     for (const config of configs) {
       const agentCard = await this.registerAgent(config).catch((error) => {
-        console.warn(`Error registering agent: ${error}`);
+        console.warn(`Error registering agent[${config.url}]: ${error}`);
+        return undefined;
       });
       if (agentCard) {
         liveAgents.push(agentCard.name);
@@ -299,12 +300,8 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
       "headers" in agent &&
       "fallbackPath" in agent
     ) {
-      try {
-        agent = new A2AClient(agent.url, agent.headers, agent.fallbackPath);
-        agentCard = await agent.agentCard();
-      } catch (error) {
-        throw error;
-      }
+      agent = new A2AClient(agent.url, agent.headers, agent.fallbackPath);
+      agentCard = await agent.agentCard();
     } else if (!agentCard) {
       throw new Error("Invalid agent type");
     }

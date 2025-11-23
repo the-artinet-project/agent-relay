@@ -2,14 +2,12 @@
  * Copyright 2025 The Artinet Project
  * SPDX-License-Identifier: Apache-2.0
  */
-import { RemoteServerConfigSchema } from "@artinet/types";
+import { ServerConfigSchema } from "@artinet/types";
 import { AgentType } from "./manager.js";
 import { z } from "zod";
 
-export const RuntimeServerConfigSchema = RemoteServerConfigSchema.extend({
-  removed: z.boolean().optional(),
-  headers: z.record(z.string(), z.string()).optional(),
-  fallbackPath: z.string().optional(),
+export const RuntimeServerConfigSchema = ServerConfigSchema.extend({
+  removed: z.boolean().optional(), //todo: rename to isRemoved
 });
 export type RuntimeServerConfig = z.infer<typeof RuntimeServerConfigSchema>;
 export const AgentRuntimeSchema = z.record(

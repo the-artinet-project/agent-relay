@@ -5,6 +5,8 @@ import {
   ExpressAgentServer,
   getContent,
   AgentCard,
+  configureLogger,
+  MessageSendParams,
 } from "@artinet/sdk";
 import {
   jest,
@@ -16,12 +18,12 @@ import {
 } from "@jest/globals";
 import { Server } from "http";
 import { join } from "path";
-
+configureLogger({ level: "error" });
 jest.setTimeout(10000);
 const TEST_CONFIG_PATH = join(process.cwd(), "test", "config");
 const testAgentCard: AgentCard = {
   name: "test-agent",
-  url: "http://localhost:3000/a2a",
+  url: "http://localhost:3001/a2a",
   description: "A test agent",
   version: "1.0.0",
   protocolVersion: "0.3.0",
@@ -78,7 +80,7 @@ describe("AgentRelay", () => {
           }),
         basePath: "/a2a",
       });
-      server = agentServer.app.listen(3000, () => {});
+      server = agentServer.app.listen(3001, () => {});
       //wait for server to start
       await new Promise((resolve) => setTimeout(resolve, 1000));
     });
@@ -92,7 +94,7 @@ describe("AgentRelay", () => {
         endPort: 3001,
       });
       expect(configs).toHaveLength(1);
-      expect(configs[0].url).toBe("http://localhost:3000");
+      expect(configs[0].url).toBe("http://localhost:3001");
       expect(configs[0].headers).toBeUndefined();
       expect(configs[0].fallbackPath).toBeUndefined();
     });
@@ -105,7 +107,7 @@ describe("AgentRelay", () => {
         endPort: 5000,
       });
       expect(configs).toHaveLength(2);
-      expect(configs[0].url).toBe("http://localhost:3000");
+      expect(configs[0].url).toBe("http://localhost:3001");
       expect(configs[1].url).toBe("http://localhost:4002");
       await server2.close();
     });
@@ -155,21 +157,22 @@ describe("AgentRelay", () => {
         expect(agents[0].name).toBe("test-agent");
       });
       it("should send message", async () => {
+        const messageSendParams: MessageSendParams = {
+          message: {
+            role: "user",
+            kind: "message",
+            parts: [
+              {
+                text: "hello",
+                kind: "text",
+              },
+            ],
+            messageId: "123",
+          },
+        };
         const response = await relay.sendMessage({
           agentId: "test-agent",
-          messageSendParams: {
-            message: {
-              role: "user",
-              kind: "message",
-              parts: [
-                {
-                  text: "hello",
-                  kind: "text",
-                },
-              ],
-              messageId: "123",
-            },
-          },
+          messageSendParams: messageSendParams,
         });
         expect(response).toBeDefined();
         const content = getContent(response);

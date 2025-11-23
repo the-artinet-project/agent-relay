@@ -21,15 +21,9 @@
     "artinet",
     "agent2agent",
     "a2a",
-    "agentic",
     "ai",
     "agent",
-    "sdk",
-    "artificial intelligence",
-    "ai agent",
-    "multi-agent",
-    "multi-agent system",
-    "orchestration"
+    "artificial intelligence"
   ],
   "type": "module",
   "main": "./dist/src/index.js",

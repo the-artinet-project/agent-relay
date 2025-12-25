@@ -2,13 +2,7 @@
  * Copyright 2025 The Artinet Project
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  A2AClient,
-  AgentCard,
-  SendMessageSuccessResult,
-  Task,
-  AgentSkill,
-} from "@artinet/sdk";
+import { A2AClient, A2A } from "@artinet/sdk";
 import {
   AgentType,
   IAgentRelay,
@@ -234,13 +228,13 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * - Errors during agent registration are logged but don't stop the process
    * - Agents that were previously registered but are no longer found are automatically removed
    */
-  public async discoverAgents(config: ScanConfig): Promise<AgentCard[]> {
+  public async discoverAgents(config: ScanConfig): Promise<A2A.AgentCard[]> {
     const configs = await scanAgents(config).catch((error) => {
       console.error(`Error scanning agents: ${error}`);
       return [];
     });
     let liveAgents: string[] = [];
-    let detectedAgents: AgentCard[] = [];
+    let detectedAgents: A2A.AgentCard[] = [];
     for (const config of configs) {
       const agentCard = await this.registerAgent(config).catch((error) => {
         console.warn(`Error registering agent[${config.url}]: ${error}`);
@@ -292,7 +286,7 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * This method is called automatically during agent discovery but can also
    * be used to manually register agents.
    */
-  async registerAgent(agent: AgentType | ClientConfig): Promise<AgentCard> {
+  async registerAgent(agent: AgentType | ClientConfig): Promise<A2A.AgentCard> {
     let agentCard = await getAgentCard(agent);
     if (
       !agentCard &&
@@ -364,7 +358,7 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    */
   async sendMessage(
     params: SendRelayMessageRequest
-  ): Promise<SendMessageSuccessResult> {
+  ): Promise<A2A.SendMessageSuccessResult> {
     const { agentId, messageSendParams } = params;
     const agent = this.getAgent(agentId);
     if (!agent) {
@@ -403,7 +397,7 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * console.log(task.result);
    * ```
    */
-  async getTask(params: GetRelayTaskRequest): Promise<Task> {
+  async getTask(params: GetRelayTaskRequest): Promise<A2A.Task> {
     const { agentId, taskQuery } = params;
     const agent = this.getAgent(agentId);
     if (!agent) {
@@ -446,7 +440,7 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * The task cancellation behavior depends on the agent's implementation.
    * Some tasks may not be immediately cancelled if they are in a critical state.
    */
-  async cancelTask(params: CancelRelayTaskRequest): Promise<Task> {
+  async cancelTask(params: CancelRelayTaskRequest): Promise<A2A.Task> {
     const { agentId, taskId } = params;
     const agent = this.getAgent(agentId);
     if (!agent) {
@@ -480,7 +474,7 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * console.log(card.skills);      // Array of available skills
    * ```
    */
-  async getAgentCard(params: AgentRelayRequest): Promise<AgentCard> {
+  async getAgentCard(params: AgentRelayRequest): Promise<A2A.AgentCard> {
     const { agentId } = params;
     const agent = this.getAgent(agentId);
     if (!agent) {
@@ -525,7 +519,7 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
    * - An empty query string will return all registered agents
    * - The search uses substring matching (not exact matching)
    */
-  async searchAgents(params: SearchRelayRequest): Promise<AgentCard[]> {
+  async searchAgents(params: SearchRelayRequest): Promise<A2A.AgentCard[]> {
     const { query } = params;
     const agents = this.getAgents();
     return (
@@ -535,11 +529,11 @@ export class AgentRelay extends AgentManager implements IAgentRelay {
         )
       )
     ).filter(
-      (agentCard: AgentCard) =>
+      (agentCard: A2A.AgentCard) =>
         agentCard.name.toLowerCase().includes(query.toLowerCase()) ||
         agentCard.description.toLowerCase().includes(query.toLowerCase()) ||
         agentCard.skills.some(
-          (skill: AgentSkill) =>
+          (skill: A2A.AgentSkill) =>
             skill.name.toLowerCase().includes(query.toLowerCase()) ||
             skill.description.toLowerCase().includes(query.toLowerCase())
         )

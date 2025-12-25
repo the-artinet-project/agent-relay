@@ -18,7 +18,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "baseUrl": "."
   },
   "include": ["src/**/*", "bin/**/*"],

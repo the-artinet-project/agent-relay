@@ -5,7 +5,7 @@
 import { Agent, A2AClient } from "@artinet/sdk";
 
 export type AgentType = Agent | A2AClient;
-
+//todo: Extend core.Manager interface
 export interface IAgentManager {
   getAgent(id: string): AgentType | undefined;
   setAgent(agent: AgentType): Promise<void>;

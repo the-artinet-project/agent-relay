@@ -2,12 +2,12 @@
  * Copyright 2025 The Artinet Project
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ServerConfigSchema } from "@artinet/types";
+import { Runtime } from "@artinet/types";
 import { AgentType } from "./manager.js";
-import { z } from "zod";
+import { z } from "zod/v4";
 
-export const RuntimeServerConfigSchema = ServerConfigSchema.extend({
-  removed: z.boolean().optional(), //todo: rename to isRemoved
+export const RuntimeServerConfigSchema = Runtime.ServerConfigSchema.extend({
+  removed: z.boolean().optional(),
 });
 export type RuntimeServerConfig = z.infer<typeof RuntimeServerConfigSchema>;
 export const AgentRuntimeSchema = z.record(

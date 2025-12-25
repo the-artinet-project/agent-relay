@@ -2,12 +2,8 @@
  * Copyright 2025 The Artinet Project
  * SPDX-License-Identifier: Apache-2.0
  */
-import z from "zod";
-import {
-  TaskQueryParamsSchema,
-  TaskIdParamsSchema,
-  MessageSendParamsSchema,
-} from "@artinet/sdk";
+import z from "zod/v4";
+import { A2A } from "@artinet/sdk";
 
 export const AgentRelayRequestSchema = z
   .object({
@@ -17,14 +13,14 @@ export const AgentRelayRequestSchema = z
 export type AgentRelayRequest = z.infer<typeof AgentRelayRequestSchema>;
 
 export const GetRelayTaskRequestSchema = AgentRelayRequestSchema.extend({
-  taskQuery: TaskQueryParamsSchema,
+  taskQuery: A2A.TaskQueryParamsSchema,
 }).describe(
   "Defines the parameters for a request to get a task being executed by an agent."
 );
 export type GetRelayTaskRequest = z.infer<typeof GetRelayTaskRequestSchema>;
 
 export const CancelRelayTaskRequestSchema = AgentRelayRequestSchema.extend({
-  taskId: TaskIdParamsSchema,
+  taskId: A2A.TaskIdParamsSchema,
 }).describe(
   "Defines the parameters for a request to cancel a task being executed by an agent."
 );
@@ -33,7 +29,7 @@ export type CancelRelayTaskRequest = z.infer<
 >;
 
 export const SendRelayMessageRequestSchema = AgentRelayRequestSchema.extend({
-  messageSendParams: MessageSendParamsSchema,
+  messageSendParams: A2A.MessageSendParamsSchema,
 }).describe("Defines the parameters for sending a message to an agent.");
 export type SendRelayMessageRequest = z.infer<
   typeof SendRelayMessageRequestSchema
@@ -47,7 +43,7 @@ export const SearchRelayRequestSchema = z
     "Defines the parameters for searching for agents by name, description, or skills. The search is case insensitive and will match against the entire name, description, and skills of the agents."
   );
 export type SearchRelayRequest = z.infer<typeof SearchRelayRequestSchema>;
-
+//todo: Extend server config schema
 export const ClientConfigSchema = z.object({
   url: z.string().url().describe("The URL of the agent to register."),
   headers: z
